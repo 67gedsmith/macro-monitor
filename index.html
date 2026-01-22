@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Macro Monitor - BMR Calculator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Macro Monitor - BMR & Macro Calculator</h1>
+        
+        <div id="profileSection" class="section">
+            <h2>User Profile</h2>
+            <form id="profileForm">
+                <div class="form-group">
+                    <label for="sex">Sex:</label>
+                    <select id="sex" required>
+                        <option value="">Select...</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="age">Age (years):</label>
+                    <input type="number" id="age" min="15" max="120" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Height:</label>
+                    <div class="unit-selector">
+                        <label><input type="radio" name="heightUnit" value="cm" checked> Centimeters</label>
+                        <label><input type="radio" name="heightUnit" value="ft"> Feet & Inches</label>
+                    </div>
+                    <div id="heightCm" class="height-input">
+                        <input type="number" id="height" min="100" max="250" step="0.1" placeholder="e.g., 175">
+                    </div>
+                    <div id="heightFt" class="height-input" style="display:none;">
+                        <input type="number" id="heightFeet" min="3" max="8" step="1" placeholder="Feet" style="width: 48%; display: inline-block;">
+                        <input type="number" id="heightInches" min="0" max="11" step="0.1" placeholder="Inches" style="width: 48%; display: inline-block; margin-left: 4%;">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="activityLevel">Activity Level:</label>
+                    <select id="activityLevel" required>
+                        <option value="">Select...</option>
+                        <option value="1.2">Sedentary (little or no exercise)</option>
+                        <option value="1.375">Lightly Active (exercise 1-3 days/week)</option>
+                        <option value="1.55">Moderately Active (exercise 3-5 days/week)</option>
+                        <option value="1.725">Very Active (exercise 6-7 days/week)</option>
+                        <option value="1.9">Extra Active (very intense exercise daily)</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn-primary">Save Profile</button>
+            </form>
+        </div>
+        
+        <div id="weightSection" class="section" style="display:none;">
+            <h2>Weight Entry</h2>
+            <form id="weightForm">
+                <div class="form-group">
+                    <label>Current Weight:</label>
+                    <div class="unit-selector">
+                        <label><input type="radio" name="weightUnit" value="kg" checked> Kilograms</label>
+                        <label><input type="radio" name="weightUnit" value="st"> Stones & Pounds</label>
+                    </div>
+                    <div id="weightKg" class="weight-input">
+                        <input type="number" id="weight" min="30" max="300" step="0.1" placeholder="e.g., 85.5">
+                    </div>
+                    <div id="weightSt" class="weight-input" style="display:none;">
+                        <input type="number" id="weightStones" min="5" max="50" step="1" placeholder="Stones" style="width: 48%; display: inline-block;">
+                        <input type="number" id="weightPounds" min="0" max="13" step="0.1" placeholder="Pounds" style="width: 48%; display: inline-block; margin-left: 4%;">
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary">Calculate</button>
+                <button type="button" id="editProfile" class="btn-secondary">Edit Profile</button>
+            </form>
+        </div>
+        
+        <div id="resultsSection" class="section" style="display:none;">
+            <h2>Results</h2>
+            
+            <div class="result-card">
+                <h3>Basal Metabolic Rate (BMR)</h3>
+                <p class="result-value" id="bmrValue">-</p>
+            </div>
+            
+            <div class="result-card">
+                <h3>Total Daily Energy Expenditure (TDEE)</h3>
+                <p class="result-value" id="tdeeValue">-</p>
+            </div>
+            
+            <h3>Weight Loss Targets</h3>
+            <table class="results-table">
+                <thead>
+                    <tr>
+                        <th>Target</th>
+                        <th>Daily Calories</th>
+                        <th>Weekly Deficit</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Lose 0.5 lb/week</td>
+                        <td id="loss05">-</td>
+                        <td>1,750 kcal</td>
+                    </tr>
+                    <tr>
+                        <td>Lose 1 lb/week</td>
+                        <td id="loss10">-</td>
+                        <td>3,500 kcal</td>
+                    </tr>
+                    <tr class="highlight">
+                        <td><strong>Lose 1.5 lb/week</strong></td>
+                        <td id="loss15"><strong>-</strong></td>
+                        <td>5,250 kcal</td>
+                    </tr>
+                    <tr>
+                        <td>Lose 2 lb/week</td>
+                        <td id="loss20">-</td>
+                        <td>7,000 kcal</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h3>Macro Breakdown (1.5 lb/week weight loss)</h3>
+            <table class="results-table">
+                <thead>
+                    <tr>
+                        <th>Macronutrient</th>
+                        <th>Percentage</th>
+                        <th>Calories</th>
+                        <th>Grams</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Protein</td>
+                        <td>35%</td>
+                        <td id="proteinKcal">-</td>
+                        <td id="proteinGrams">-</td>
+                    </tr>
+                    <tr>
+                        <td>Carbohydrates</td>
+                        <td>35%</td>
+                        <td id="carbsKcal">-</td>
+                        <td id="carbsGrams">-</td>
+                    </tr>
+                    <tr>
+                        <td>Fat</td>
+                        <td>30%</td>
+                        <td id="fatKcal">-</td>
+                        <td id="fatGrams">-</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="info-box">
+                <p><strong>Note:</strong> These calculations are based on the Mifflin-St Jeor Equation. 
+                Your target is set to lose 1.5 pounds per week. This requires a daily calorie deficit of 750 kcal.</p>
+            </div>
+        </div>
+    </div>
+    
+    <script src="app.js"></script>
+</body>
+</html>
