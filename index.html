@@ -10,12 +10,30 @@
     <div class="container">
         <h1>Macro Monitor - BMR & Macro Calculator</h1>
         
+        <div id="userSelectionSection" class="section">
+            <h2>User Management</h2>
+            <div class="user-controls">
+                <div class="form-group">
+                    <label for="userSelect">Select User:</label>
+                    <select id="userSelect">
+                        <option value="">-- Create New User --</option>
+                    </select>
+                </div>
+                <button type="button" id="deleteUserBtn" class="btn-danger" style="display:none;">Delete Current User</button>
+            </div>
+        </div>
+        
         <div id="profileSection" class="section">
             <h2>User Profile</h2>
             <form id="profileForm">
                 <div class="form-group">
+                    <label for="userName">User Name:</label>
+                    <input type="text" id="userName" placeholder="Enter name" autocomplete="off" tabindex="1">
+                </div>
+                
+                <div class="form-group">
                     <label for="sex">Sex:</label>
-                    <select id="sex" required>
+                    <select id="sex" tabindex="2">
                         <option value="">Select...</option>
                         <option value="male">Male</option>
                         <option value="female">Female</option>
@@ -24,7 +42,7 @@
                 
                 <div class="form-group">
                     <label for="age">Age (years):</label>
-                    <input type="number" id="age" min="15" max="120" required>
+                    <input type="number" id="age" min="15" max="120" autocomplete="off" tabindex="3">
                 </div>
                 
                 <div class="form-group">
@@ -34,17 +52,17 @@
                         <label><input type="radio" name="heightUnit" value="ft"> Feet & Inches</label>
                     </div>
                     <div id="heightCm" class="height-input">
-                        <input type="number" id="height" min="100" max="250" step="0.1" placeholder="e.g., 175">
+                        <input type="number" id="height" min="100" max="250" step="0.1" placeholder="e.g., 175" autocomplete="off">
                     </div>
-                    <div id="heightFt" class="height-input" style="display:none;">
-                        <input type="number" id="heightFeet" min="3" max="8" step="1" placeholder="Feet" style="width: 48%; display: inline-block;">
-                        <input type="number" id="heightInches" min="0" max="11" step="0.1" placeholder="Inches" style="width: 48%; display: inline-block; margin-left: 4%;">
+                    <div id="heightFt" class="height-input" style="display:none; white-space: nowrap;">
+                        <input type="number" id="heightFeet" min="3" max="8" step="1" placeholder="Feet" style="width: 48%; display: inline-block; margin-right: 2%;" autocomplete="off">
+                        <input type="number" id="heightInches" min="0" max="11" step="0.1" placeholder="Inches" style="width: 48%; display: inline-block;" autocomplete="off">
                     </div>
                 </div>
                 
                 <div class="form-group">
                     <label for="activityLevel">Activity Level:</label>
-                    <select id="activityLevel" required>
+                    <select id="activityLevel">
                         <option value="">Select...</option>
                         <option value="1.2">Sedentary (little or no exercise)</option>
                         <option value="1.375">Lightly Active (exercise 1-3 days/week)</option>
@@ -70,9 +88,9 @@
                     <div id="weightKg" class="weight-input">
                         <input type="number" id="weight" min="30" max="300" step="0.1" placeholder="e.g., 85.5">
                     </div>
-                    <div id="weightSt" class="weight-input" style="display:none;">
-                        <input type="number" id="weightStones" min="5" max="50" step="1" placeholder="Stones" style="width: 48%; display: inline-block;">
-                        <input type="number" id="weightPounds" min="0" max="13" step="0.1" placeholder="Pounds" style="width: 48%; display: inline-block; margin-left: 4%;">
+                    <div id="weightSt" class="weight-input" style="display:none; white-space: nowrap;">
+                        <input type="number" id="weightStones" min="5" max="50" step="1" placeholder="Stones" style="width: 48%; display: inline-block; margin-right: 2%;">
+                        <input type="number" id="weightPounds" min="0" max="13" step="0.1" placeholder="Pounds" style="width: 48%; display: inline-block;">
                     </div>
                 </div>
                 <button type="submit" class="btn-primary">Calculate</button>
@@ -82,6 +100,7 @@
         
         <div id="resultsSection" class="section" style="display:none;">
             <h2>Results</h2>
+            <button type="button" id="backToWeightBtn" class="btn-secondary" style="margin-bottom: 20px;">← Back to Weight Entry</button>
             
             <div class="result-card">
                 <h3>Basal Metabolic Rate (BMR)</h3>
@@ -127,6 +146,30 @@
             </table>
             
             <h3>Macro Breakdown (1.5 lb/week weight loss)</h3>
+            <div class="macro-controls">
+                <button type="button" id="customizeMacrosBtn" class="btn-secondary">Customize Macro Percentages</button>
+            </div>
+            
+            <div id="macroCustomizationSection" style="display:none;">
+                <div class="form-group">
+                    <label for="proteinPercent">Protein %:</label>
+                    <input type="number" id="proteinPercent" min="0" max="100" step="1" value="35">
+                </div>
+                <div class="form-group">
+                    <label for="carbsPercent">Carbohydrates %:</label>
+                    <input type="number" id="carbsPercent" min="0" max="100" step="1" value="35">
+                </div>
+                <div class="form-group">
+                    <label for="fatPercent">Fat %:</label>
+                    <input type="number" id="fatPercent" min="0" max="100" step="1" value="30">
+                </div>
+                <div class="info-box" id="macroValidation">
+                    <p><strong>Total:</strong> <span id="totalMacroPercent">100</span>% (must equal 100%)</p>
+                </div>
+                <button type="button" id="saveMacrosBtn" class="btn-primary">Save Macro Settings</button>
+                <button type="button" id="cancelMacrosBtn" class="btn-secondary">Cancel</button>
+            </div>
+            
             <table class="results-table">
                 <thead>
                     <tr>
@@ -139,19 +182,19 @@
                 <tbody>
                     <tr>
                         <td>Protein</td>
-                        <td>35%</td>
+                        <td id="proteinPercent-display">35%</td>
                         <td id="proteinKcal">-</td>
                         <td id="proteinGrams">-</td>
                     </tr>
                     <tr>
                         <td>Carbohydrates</td>
-                        <td>35%</td>
+                        <td id="carbsPercent-display">35%</td>
                         <td id="carbsKcal">-</td>
                         <td id="carbsGrams">-</td>
                     </tr>
                     <tr>
                         <td>Fat</td>
-                        <td>30%</td>
+                        <td id="fatPercent-display">30%</td>
                         <td id="fatKcal">-</td>
                         <td id="fatGrams">-</td>
                     </tr>

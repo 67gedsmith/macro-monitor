@@ -1,4 +1,4 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 
 function createWindow() {
@@ -7,17 +7,23 @@ function createWindow() {
     height: 800,
     webPreferences: {
       nodeIntegration: true,
-      contextIsolation: false
+      contextIsolation: false,
+      enableRemoteModule: true,
+      webSecurity: true,
+      spellcheck: false
     },
     icon: path.join(__dirname, 'icon.ico')
   });
 
   win.loadFile('index.html');
   
-  // Open DevTools in development mode
-  if (process.argv.includes('--dev')) {
-    win.webContents.openDevTools();
-  }
+  // Handle IPC request to blur/focus window to wake up input system
+  ipcMain.on('wake-input', () => {
+    win.blur();
+    setTimeout(() => {
+      win.focus();
+    }, 50);
+  });
 }
 
 app.whenReady().then(() => {
