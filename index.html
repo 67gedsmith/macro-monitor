@@ -99,17 +99,19 @@
         </div>
         
         <div id="resultsSection" class="section" style="display:none;">
-            <h2>Results</h2>
+            <h2>Results for <span id="resultsUserName"></span></h2>
             <button type="button" id="backToWeightBtn" class="btn-secondary" style="margin-bottom: 20px;">← Back to Weight Entry</button>
             
             <div class="result-card">
                 <h3>Basal Metabolic Rate (BMR)</h3>
                 <p class="result-value" id="bmrValue">-</p>
+                <p class="result-explanation">Your BMR is the number of calories your body burns at rest just to maintain vital functions.</p>
             </div>
             
             <div class="result-card">
                 <h3>Total Daily Energy Expenditure (TDEE)</h3>
                 <p class="result-value" id="tdeeValue">-</p>
+                <p class="result-explanation">Your TDEE is the total calories you burn daily including all activities and exercise.</p>
             </div>
             
             <h3>Weight Loss Targets</h3>
@@ -145,7 +147,16 @@
                 </tbody>
             </table>
             
-            <h3>Macro Breakdown (1.5 lb/week weight loss)</h3>
+            <h3>Macro Breakdown</h3>
+            <div class="form-group" style="max-width: 400px; margin-bottom: 20px;">
+                <label for="weightLossTarget">Weight Loss Target:</label>
+                <select id="weightLossTarget">
+                    <option value="loss05">Lose 0.5 lb/week</option>
+                    <option value="loss10">Lose 1 lb/week</option>
+                    <option value="loss15" selected>Lose 1.5 lb/week</option>
+                    <option value="loss20">Lose 2 lb/week</option>
+                </select>
+            </div>
             <div class="macro-controls">
                 <button type="button" id="customizeMacrosBtn" class="btn-secondary">Customize Macro Percentages</button>
             </div>
@@ -204,6 +215,138 @@
             <div class="info-box">
                 <p><strong>Note:</strong> These calculations are based on the Mifflin-St Jeor Equation. 
                 Your target is set to lose 1.5 pounds per week. This requires a daily calorie deficit of 750 kcal.</p>
+                <div style="margin-top: 15px;">
+                    <button type="button" id="showKatchMcArdleBtn" class="btn-secondary">Calculate Using Body Fat % (Katch-McArdle)</button>
+                    <button type="button" id="hideKatchMcArdleSectionBtn" class="btn-secondary" style="display:none; margin-left: 10px;">Hide Katch-McArdle Results</button>
+                </div>
+            </div>
+            
+            <div id="katchMcArdleSection" style="display:none; margin-top: 20px;">
+                <h3>Katch-McArdle Formula (Body Fat Based)</h3>
+                <div class="form-group" style="max-width: 300px;">
+                    <label for="bodyFatPercent">Body Fat Percentage:</label>
+                    <input type="number" id="bodyFatPercent" min="5" max="50" step="0.1" placeholder="e.g., 25.5">
+                    <small style="color: #666; display: block; margin-top: 5px;">Enter your body fat % (typically 10-30%)</small>
+                </div>
+                <button type="button" id="calculateKatchMcArdleBtn" class="btn-primary">Calculate</button>
+                <button type="button" id="hideKatchMcArdleBtn" class="btn-secondary">Cancel</button>
+                
+                <div id="katchMcArdleResults" style="display:none; margin-top: 20px;">
+                    <div class="result-card">
+                        <h3>Katch-McArdle BMR</h3>
+                        <p class="result-value" id="katchBmrValue">-</p>
+                        <p class="result-explanation">BMR calculated using lean body mass (more accurate if you know your body fat %).</p>
+                    </div>
+                    
+                    <div class="result-card">
+                        <h3>Katch-McArdle TDEE</h3>
+                        <p class="result-value" id="katchTdeeValue">-</p>
+                        <p class="result-explanation">Your total daily energy expenditure based on lean body mass.</p>
+                    </div>
+                    
+                    <h3>Weight Loss Targets (Katch-McArdle)</h3>
+                    <table class="results-table">
+                        <thead>
+                            <tr>
+                                <th>Target</th>
+                                <th>Daily Calories</th>
+                                <th>Weekly Deficit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Lose 0.5 lb/week</td>
+                                <td id="katchLoss05">-</td>
+                                <td>1,750 kcal</td>
+                            </tr>
+                            <tr>
+                                <td>Lose 1 lb/week</td>
+                                <td id="katchLoss10">-</td>
+                                <td>3,500 kcal</td>
+                            </tr>
+                            <tr class="highlight">
+                                <td><strong>Lose 1.5 lb/week</strong></td>
+                                <td id="katchLoss15"><strong>-</strong></td>
+                                <td>5,250 kcal</td>
+                            </tr>
+                            <tr>
+                                <td>Lose 2 lb/week</td>
+                                <td id="katchLoss20">-</td>
+                                <td>7,000 kcal</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="info-box" style="margin-top: 15px;">
+                        <p><strong>Lean Body Mass:</strong> <span id="leanBodyMass">-</span> kg</p>
+                        <p style="margin-top: 10px;"><strong>Note:</strong> The Katch-McArdle formula is often more accurate for individuals who know their body fat percentage, as it accounts for lean muscle mass.</p>
+                    </div>
+                    
+                    <h3>Macro Breakdown (Katch-McArdle)</h3>
+                    <div class="form-group" style="max-width: 400px; margin-bottom: 20px;">
+                        <label for="katchWeightLossTarget">Weight Loss Target:</label>
+                        <select id="katchWeightLossTarget">
+                            <option value="loss05">Lose 0.5 lb/week</option>
+                            <option value="loss10">Lose 1 lb/week</option>
+                            <option value="loss15" selected>Lose 1.5 lb/week</option>
+                            <option value="loss20">Lose 2 lb/week</option>
+                        </select>
+                    </div>
+                    <div class="macro-controls">
+                        <button type="button" id="katchCustomizeMacrosBtn" class="btn-secondary">Customize Macro Percentages</button>
+                    </div>
+                    
+                    <div id="katchMacroCustomizationSection" style="display:none;">
+                        <div class="form-group">
+                            <label for="katchProteinPercent">Protein %:</label>
+                            <input type="number" id="katchProteinPercent" min="0" max="100" step="1" value="35">
+                        </div>
+                        <div class="form-group">
+                            <label for="katchCarbsPercent">Carbohydrates %:</label>
+                            <input type="number" id="katchCarbsPercent" min="0" max="100" step="1" value="35">
+                        </div>
+                        <div class="form-group">
+                            <label for="katchFatPercent">Fat %:</label>
+                            <input type="number" id="katchFatPercent" min="0" max="100" step="1" value="30">
+                        </div>
+                        <div class="info-box" id="katchMacroValidation">
+                            <p><strong>Total:</strong> <span id="katchTotalMacroPercent">100</span>% (must equal 100%)</p>
+                        </div>
+                        <button type="button" id="katchSaveMacrosBtn" class="btn-primary">Save Macro Settings</button>
+                        <button type="button" id="katchCancelMacrosBtn" class="btn-secondary">Cancel</button>
+                    </div>
+                    
+                    <table class="results-table">
+                        <thead>
+                            <tr>
+                                <th>Macronutrient</th>
+                                <th>Percentage</th>
+                                <th>Calories</th>
+                                <th>Grams</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Protein</td>
+                                <td id="katchProteinPercent-display">35%</td>
+                                <td id="katchProteinKcal">-</td>
+                                <td id="katchProteinGrams">-</td>
+                            </tr>
+                            <tr>
+                                <td>Carbohydrates</td>
+                                <td id="katchCarbsPercent-display">35%</td>
+                                <td id="katchCarbsKcal">-</td>
+                                <td id="katchCarbsGrams">-</td>
+                            </tr>
+                            <tr>
+                                <td>Fat</td>
+                                <td id="katchFatPercent-display">30%</td>
+                                <td id="katchFatKcal">-</td>
+                                <td id="katchFatGrams">-</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>

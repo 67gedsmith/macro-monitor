@@ -171,11 +171,54 @@ class MacroMonitor {
         document.getElementById('backToWeightBtn').addEventListener('click', () => {
             this.backToWeightEntry();
         });
+        
+        document.getElementById('weightLossTarget').addEventListener('change', () => {
+            this.updateMacroBreakdown();
+        });
+        
+        document.getElementById('showKatchMcArdleBtn').addEventListener('click', () => {
+            this.showKatchMcArdleSection();
+        });
+        
+        document.getElementById('hideKatchMcArdleSectionBtn').addEventListener('click', () => {
+            this.hideKatchMcArdleSection();
+        });
+        
+        document.getElementById('calculateKatchMcArdleBtn').addEventListener('click', () => {
+            this.calculateKatchMcArdle();
+        });
+        
+        document.getElementById('hideKatchMcArdleBtn').addEventListener('click', () => {
+            this.hideKatchMcArdleSection();
+        });
+        
+        document.getElementById('katchWeightLossTarget').addEventListener('change', () => {
+            this.updateKatchMacroBreakdown();
+        });
+        
+        document.getElementById('katchCustomizeMacrosBtn').addEventListener('click', () => {
+            this.showKatchMacroCustomization();
+        });
+        
+        document.getElementById('katchSaveMacrosBtn').addEventListener('click', () => {
+            this.saveKatchMacroPercentages();
+        });
+        
+        document.getElementById('katchCancelMacrosBtn').addEventListener('click', () => {
+            this.hideKatchMacroCustomization();
+        });
 
         // Update total when macro percentages change
         ['proteinPercent', 'carbsPercent', 'fatPercent'].forEach(id => {
             document.getElementById(id).addEventListener('input', () => {
                 this.updateMacroTotal();
+            });
+        });
+        
+        // Update total for Katch-McArdle macro percentages
+        ['katchProteinPercent', 'katchCarbsPercent', 'katchFatPercent'].forEach(id => {
+            document.getElementById(id).addEventListener('input', () => {
+                this.updateKatchMacroTotal();
             });
         });
     }
@@ -249,7 +292,22 @@ class MacroMonitor {
             // Load saved weight if available
             const user = this.users[this.currentUserId];
             if (user.weight) {
-                document.getElementById('weight').value = user.weight;
+                // Restore weight unit preference
+                const weightUnit = user.weightUnit || 'kg';
+                document.querySelector(`input[name="weightUnit"][value="${weightUnit}"]`).checked = true;
+                
+                // Show/hide appropriate weight input based on saved unit
+                if (weightUnit === 'kg') {
+                    document.getElementById('weightKg').style.display = 'block';
+                    document.getElementById('weightSt').style.display = 'none';
+                    document.getElementById('weight').value = user.weightKg || user.weight;
+                } else {
+                    document.getElementById('weightKg').style.display = 'none';
+                    document.getElementById('weightSt').style.display = 'block';
+                    document.getElementById('weightStones').value = user.weightStones || 0;
+                    document.getElementById('weightPounds').value = user.weightPounds || 0;
+                }
+                
                 this.calculateResults();
             }
         } else {
@@ -642,8 +700,19 @@ class MacroMonitor {
             return;
         }
 
-        // Save current weight for this user
+        // Save current weight and weight unit for this user
+        const weightUnit = document.querySelector('input[name="weightUnit"]:checked').value;
         this.users[this.currentUserId].weight = weight;
+        this.users[this.currentUserId].weightUnit = weightUnit;
+        
+        // Save original weight values based on unit
+        if (weightUnit === 'kg') {
+            this.users[this.currentUserId].weightKg = parseFloat(document.getElementById('weight').value);
+        } else {
+            this.users[this.currentUserId].weightStones = parseFloat(document.getElementById('weightStones').value) || 0;
+            this.users[this.currentUserId].weightPounds = parseFloat(document.getElementById('weightPounds').value) || 0;
+        }
+        
         this.saveUsers();
 
         // Calculate BMR
@@ -666,6 +735,12 @@ class MacroMonitor {
         // Show results section
         document.getElementById('resultsSection').style.display = 'block';
 
+        // Display username
+        const user = this.users[this.currentUserId];
+        if (user && user.name) {
+            document.getElementById('resultsUserName').textContent = user.name;
+        }
+
         // Display BMR and TDEE
         document.getElementById('bmrValue').textContent = `${bmr} kcal/day`;
         document.getElementById('tdeeValue').textContent = `${tdee} kcal/day`;
@@ -675,8 +750,18 @@ class MacroMonitor {
         document.getElementById('loss10').textContent = `${weightLoss.loss10} kcal/day`;
         document.getElementById('loss15').innerHTML = `<strong>${weightLoss.loss15} kcal/day</strong>`;
         document.getElementById('loss20').textContent = `${weightLoss.loss20} kcal/day`;
+        
+        // Store weight loss values for macro calculation
+        this.currentWeightLoss = weightLoss;
 
         // Display macros with custom percentages
+        this.updateMacroDisplay(macros);
+
+        // Scroll to results
+        document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    updateMacroDisplay(macros) {
         document.getElementById('proteinPercent-display').textContent = `${macros.protein.percent}%`;
         document.getElementById('proteinKcal').textContent = `${macros.protein.kcal} kcal`;
         document.getElementById('proteinGrams').textContent = `${macros.protein.grams}g`;
@@ -688,9 +773,207 @@ class MacroMonitor {
         document.getElementById('fatPercent-display').textContent = `${macros.fat.percent}%`;
         document.getElementById('fatKcal').textContent = `${macros.fat.kcal} kcal`;
         document.getElementById('fatGrams').textContent = `${macros.fat.grams}g`;
+    }
+    
+    updateMacroBreakdown() {
+        if (!this.currentWeightLoss) return;
+        
+        const target = document.getElementById('weightLossTarget').value;
+        const dailyCalories = this.currentWeightLoss[target];
+        const macros = this.calculateMacros(dailyCalories);
+        this.updateMacroDisplay(macros);
+    }
+    
+    showKatchMcArdleSection() {
+        document.getElementById('katchMcArdleSection').style.display = 'block';
+        document.getElementById('hideKatchMcArdleSectionBtn').style.display = 'inline-block';
+        const user = this.users[this.currentUserId];
+        if (user && user.bodyFatPercent) {
+            document.getElementById('bodyFatPercent').value = user.bodyFatPercent;
+        }
+        document.getElementById('katchMcArdleSection').scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    hideKatchMcArdleSection() {
+        document.getElementById('katchMcArdleSection').style.display = 'none';
+        document.getElementById('katchMcArdleResults').style.display = 'none';
+        document.getElementById('hideKatchMcArdleSectionBtn').style.display = 'none';
+    }
+    
+    calculateKatchMcArdle() {
+        const bodyFatPercent = parseFloat(document.getElementById('bodyFatPercent').value);
+        
+        if (!bodyFatPercent || bodyFatPercent < 5 || bodyFatPercent > 50) {
+            alert('Please enter a valid body fat percentage (typically between 5% and 50%)');
+            return;
+        }
+        
+        const user = this.users[this.currentUserId];
+        if (!user || !user.weight) {
+            alert('Weight data not found');
+            return;
+        }
+        
+        // Save body fat percentage
+        user.bodyFatPercent = bodyFatPercent;
+        
+        // Initialize Katch-McArdle macros if not set
+        if (!user.katchMacros) {
+            user.katchMacros = { protein: 35, carbs: 35, fat: 30 };
+        }
+        
+        this.saveUsers();
+        
+        // Calculate lean body mass
+        const weight = user.weight;
+        const leanBodyMass = weight * (1 - bodyFatPercent / 100);
+        
+        // Katch-McArdle Formula: BMR = 370 + 21.6 × LBM (in kg)
+        const katchBmr = Math.round(370 + 21.6 * leanBodyMass);
+        
+        // Calculate TDEE
+        const katchTdee = Math.round(katchBmr * user.activityLevel);
+        
+        // Calculate weight loss targets
+        const katchWeightLoss = {
+            loss05: Math.round(katchTdee - 250),
+            loss10: Math.round(katchTdee - 500),
+            loss15: Math.round(katchTdee - 750),
+            loss20: Math.round(katchTdee - 1000)
+        };
+        
+        // Store for macro calculations
+        this.currentKatchWeightLoss = katchWeightLoss;
+        
+        // Display results
+        document.getElementById('katchBmrValue').textContent = `${katchBmr} kcal/day`;
+        document.getElementById('katchTdeeValue').textContent = `${katchTdee} kcal/day`;
+        document.getElementById('leanBodyMass').textContent = leanBodyMass.toFixed(1);
+        
+        document.getElementById('katchLoss05').textContent = `${katchWeightLoss.loss05} kcal/day`;
+        document.getElementById('katchLoss10').textContent = `${katchWeightLoss.loss10} kcal/day`;
+        document.getElementById('katchLoss15').innerHTML = `<strong>${katchWeightLoss.loss15} kcal/day</strong>`;
+        document.getElementById('katchLoss20').textContent = `${katchWeightLoss.loss20} kcal/day`;
+        
+        // Calculate and display macros for default 1.5 lb/week target
+        const macros = this.calculateKatchMacros(katchWeightLoss.loss15);
+        this.updateKatchMacroDisplay(macros);
+        
+        document.getElementById('katchMcArdleResults').style.display = 'block';
+        document.getElementById('katchMcArdleResults').scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    // Katch-McArdle Macro Methods
+    calculateKatchMacros(dailyCalories) {
+        const user = this.users[this.currentUserId];
+        if (!user) return null;
 
-        // Scroll to results
-        document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+        // Get user's custom Katch-McArdle macro percentages
+        const macros = user.katchMacros || { protein: 35, carbs: 35, fat: 30 };
+        const proteinPercent = macros.protein / 100;
+        const carbsPercent = macros.carbs / 100;
+        const fatPercent = macros.fat / 100;
+        
+        const proteinKcal = Math.round(dailyCalories * proteinPercent);
+        const carbsKcal = Math.round(dailyCalories * carbsPercent);
+        const fatKcal = Math.round(dailyCalories * fatPercent);
+
+        const proteinGrams = Math.round(proteinKcal / 4);
+        const carbsGrams = Math.round(carbsKcal / 4);
+        const fatGrams = Math.round(fatKcal / 9);
+
+        return {
+            protein: { kcal: proteinKcal, grams: proteinGrams, percent: macros.protein },
+            carbs: { kcal: carbsKcal, grams: carbsGrams, percent: macros.carbs },
+            fat: { kcal: fatKcal, grams: fatGrams, percent: macros.fat }
+        };
+    }
+    
+    updateKatchMacroDisplay(macros) {
+        document.getElementById('katchProteinPercent-display').textContent = `${macros.protein.percent}%`;
+        document.getElementById('katchProteinKcal').textContent = `${macros.protein.kcal} kcal`;
+        document.getElementById('katchProteinGrams').textContent = `${macros.protein.grams}g`;
+        
+        document.getElementById('katchCarbsPercent-display').textContent = `${macros.carbs.percent}%`;
+        document.getElementById('katchCarbsKcal').textContent = `${macros.carbs.kcal} kcal`;
+        document.getElementById('katchCarbsGrams').textContent = `${macros.carbs.grams}g`;
+        
+        document.getElementById('katchFatPercent-display').textContent = `${macros.fat.percent}%`;
+        document.getElementById('katchFatKcal').textContent = `${macros.fat.kcal} kcal`;
+        document.getElementById('katchFatGrams').textContent = `${macros.fat.grams}g`;
+    }
+    
+    updateKatchMacroBreakdown() {
+        if (!this.currentKatchWeightLoss) return;
+        
+        const target = document.getElementById('katchWeightLossTarget').value;
+        const dailyCalories = this.currentKatchWeightLoss[target];
+        const macros = this.calculateKatchMacros(dailyCalories);
+        this.updateKatchMacroDisplay(macros);
+    }
+    
+    showKatchMacroCustomization() {
+        const user = this.users[this.currentUserId];
+        if (!user) return;
+        
+        if (!user.katchMacros) {
+            user.katchMacros = { protein: 35, carbs: 35, fat: 30 };
+        }
+
+        document.getElementById('katchProteinPercent').value = user.katchMacros.protein;
+        document.getElementById('katchCarbsPercent').value = user.katchMacros.carbs;
+        document.getElementById('katchFatPercent').value = user.katchMacros.fat;
+        
+        this.updateKatchMacroTotal();
+        document.getElementById('katchMacroCustomizationSection').style.display = 'block';
+    }
+
+    hideKatchMacroCustomization() {
+        document.getElementById('katchMacroCustomizationSection').style.display = 'none';
+    }
+
+    updateKatchMacroTotal() {
+        const protein = parseFloat(document.getElementById('katchProteinPercent').value) || 0;
+        const carbs = parseFloat(document.getElementById('katchCarbsPercent').value) || 0;
+        const fat = parseFloat(document.getElementById('katchFatPercent').value) || 0;
+        const total = protein + carbs + fat;
+        
+        const totalSpan = document.getElementById('katchTotalMacroPercent');
+        totalSpan.textContent = total;
+        
+        const validationBox = document.getElementById('katchMacroValidation');
+        if (total === 100) {
+            validationBox.style.backgroundColor = '#d4edda';
+            validationBox.style.borderColor = '#c3e6cb';
+            validationBox.style.color = '#155724';
+        } else {
+            validationBox.style.backgroundColor = '#f8d7da';
+            validationBox.style.borderColor = '#f5c6cb';
+            validationBox.style.color = '#721c24';
+        }
+    }
+
+    saveKatchMacroPercentages() {
+        const protein = parseFloat(document.getElementById('katchProteinPercent').value) || 0;
+        const carbs = parseFloat(document.getElementById('katchCarbsPercent').value) || 0;
+        const fat = parseFloat(document.getElementById('katchFatPercent').value) || 0;
+        const total = protein + carbs + fat;
+
+        if (total !== 100) {
+            alert('Macro percentages must total 100%');
+            return;
+        }
+
+        const user = this.users[this.currentUserId];
+        user.katchMacros = { protein, carbs, fat };
+        this.saveUsers();
+
+        this.hideKatchMacroCustomization();
+        
+        // Recalculate with new macros
+        if (this.currentKatchWeightLoss) {
+            this.updateKatchMacroBreakdown();
+        }
     }
 }
 

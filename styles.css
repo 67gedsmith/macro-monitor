@@ -227,6 +227,14 @@ input[type="number"]:focus {
     color: #333;
 }
 
+.result-explanation {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #666;
+    font-style: italic;
+    line-height: 1.4;
+}
+
 .results-table {
     width: 100%;
     border-collapse: collapse;
