@@ -287,21 +287,190 @@ input[type="number"]:focus {
 }
 
 /* Responsive adjustments */
+/* Mobile Responsive Styles */
 @media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+
     .container {
-        padding: 20px;
+        padding: 15px;
+        border-radius: 8px;
     }
 
     h1 {
-        font-size: 24px;
+        font-size: 22px;
+        margin-bottom: 20px;
+    }
+
+    h2 {
+        font-size: 20px;
+        margin-bottom: 15px;
+    }
+
+    h3 {
+        font-size: 16px;
+        margin-top: 20px;
+        margin-bottom: 10px;
+    }
+
+    .section {
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-group label {
+        font-size: 14px;
+    }
+
+    .form-group input,
+    .form-group select {
+        padding: 10px;
+        font-size: 16px; /* Prevents zoom on iOS */
+    }
+
+    .btn-primary,
+    .btn-secondary,
+    .btn-danger {
+        padding: 12px 20px;
+        font-size: 16px;
+        width: 100%;
+        margin-bottom: 10px;
     }
 
     .results-table {
-        font-size: 14px;
+        font-size: 13px;
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
     }
 
     .results-table th,
     .results-table td {
+        padding: 8px 5px;
+        font-size: 13px;
+    }
+
+    .result-value {
+        font-size: 28px;
+    }
+
+    .result-explanation {
+        font-size: 13px;
+    }
+
+    .result-card {
+        padding: 15px;
+        margin-bottom: 12px;
+    }
+
+    .info-box {
+        padding: 12px;
+        font-size: 13px;
+    }
+
+    .unit-selector {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .macro-controls {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .macro-controls button {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    /* Touch-friendly spacing */
+    input[type="radio"],
+    input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        margin-right: 8px;
+    }
+
+    /* Make select boxes more touch-friendly */
+    select {
+        height: 44px;
+        font-size: 16px;
+    }
+
+    /* Ensure tables are scrollable on small screens */
+    table {
+        min-width: 100%;
+    }
+}
+
+/* Extra small devices (phones in portrait mode) */
+@media (max-width: 480px) {
+    body {
+        padding: 5px;
+    }
+
+    .container {
         padding: 10px;
+        border-radius: 6px;
+    }
+
+    h1 {
+        font-size: 20px;
+        margin-bottom: 15px;
+    }
+
+    h2 {
+        font-size: 18px;
+    }
+
+    h3 {
+        font-size: 15px;
+    }
+
+    .section {
+        padding: 10px;
+    }
+
+    .results-table th,
+    .results-table td {
+        padding: 6px 4px;
+        font-size: 12px;
+    }
+
+    .result-value {
+        font-size: 24px;
+    }
+
+    .btn-primary,
+    .btn-secondary,
+    .btn-danger {
+        padding: 10px 15px;
+        font-size: 15px;
+    }
+}
+
+/* Landscape mode adjustments */
+@media (max-height: 600px) and (orientation: landscape) {
+    body {
+        padding: 10px;
+    }
+
+    .container {
+        padding: 15px;
+    }
+
+    h1 {
+        font-size: 20px;
+        margin-bottom: 15px;
+    }
+
+    .section {
+        padding: 10px;
+        margin-bottom: 15px;
     }
 }
