@@ -38,15 +38,24 @@ class MacroMonitor {
         const heightRadios = document.querySelectorAll('input[name="heightUnit"]');
         const heightCm = document.getElementById('heightCm');
         const heightFt = document.getElementById('heightFt');
+        const heightInput = document.getElementById('height');
+        const heightFeetInput = document.getElementById('heightFeet');
+        const heightInchesInput = document.getElementById('heightInches');
         
         heightRadios.forEach(radio => {
             radio.addEventListener('change', function() {
                 if (this.value === 'cm') {
                     heightCm.style.display = 'block';
                     heightFt.style.display = 'none';
+                    heightInput.required = true;
+                    heightFeetInput.required = false;
+                    heightInchesInput.required = false;
                 } else {
                     heightCm.style.display = 'none';
                     heightFt.style.display = 'block';
+                    heightInput.required = false;
+                    heightFeetInput.required = true;
+                    heightInchesInput.required = true;
                 }
             });
             
@@ -55,9 +64,15 @@ class MacroMonitor {
                 if (this.value === 'cm') {
                     heightCm.style.display = 'block';
                     heightFt.style.display = 'none';
+                    heightInput.required = true;
+                    heightFeetInput.required = false;
+                    heightInchesInput.required = false;
                 } else {
                     heightCm.style.display = 'none';
                     heightFt.style.display = 'block';
+                    heightInput.required = false;
+                    heightFeetInput.required = true;
+                    heightInchesInput.required = true;
                 }
             });
         });
@@ -66,15 +81,24 @@ class MacroMonitor {
         const weightRadios = document.querySelectorAll('input[name="weightUnit"]');
         const weightKg = document.getElementById('weightKg');
         const weightSt = document.getElementById('weightSt');
+        const weightInput = document.getElementById('weight');
+        const weightStonesInput = document.getElementById('weightStones');
+        const weightPoundsInput = document.getElementById('weightPounds');
         
         weightRadios.forEach(radio => {
             radio.addEventListener('change', function() {
                 if (this.value === 'kg') {
                     weightKg.style.display = 'block';
                     weightSt.style.display = 'none';
+                    weightInput.required = true;
+                    weightStonesInput.required = false;
+                    weightPoundsInput.required = false;
                 } else {
                     weightKg.style.display = 'none';
                     weightSt.style.display = 'block';
+                    weightInput.required = false;
+                    weightStonesInput.required = true;
+                    weightPoundsInput.required = true;
                 }
             });
             
@@ -83,9 +107,15 @@ class MacroMonitor {
                 if (this.value === 'kg') {
                     weightKg.style.display = 'block';
                     weightSt.style.display = 'none';
+                    weightInput.required = true;
+                    weightStonesInput.required = false;
+                    weightPoundsInput.required = false;
                 } else {
                     weightKg.style.display = 'none';
                     weightSt.style.display = 'block';
+                    weightInput.required = false;
+                    weightStonesInput.required = true;
+                    weightPoundsInput.required = true;
                 }
             });
         });
@@ -154,6 +184,14 @@ class MacroMonitor {
 
         document.getElementById('editProfile').addEventListener('click', () => {
             this.editProfile();
+        });
+
+        document.getElementById('backToProfileBtn').addEventListener('click', () => {
+            this.editProfile();
+        });
+
+        document.getElementById('continueToWeightBtn').addEventListener('click', () => {
+            this.goToWeightEntry();
         });
 
         document.getElementById('customizeMacrosBtn').addEventListener('click', () => {
@@ -410,6 +448,11 @@ class MacroMonitor {
             document.getElementById('weightStones').value = '';
             document.getElementById('weightPounds').value = '';
             
+            // Clear Katch-McArdle section
+            document.getElementById('bodyFatPercent').value = '';
+            document.getElementById('katchMcArdleSection').style.display = 'none';
+            document.getElementById('katchMcArdleResults').style.display = 'none';
+            
             // Re-setup input handlers after deletion with delay
             setTimeout(() => {
                 this.setupInputFieldHandlers();
@@ -494,11 +537,24 @@ class MacroMonitor {
             this.currentUserId = this.generateUserId();
         }
 
+        // Get the selected unit and original values
+        const heightUnit = document.querySelector('input[name="heightUnit"]:checked').value;
+        const heightData = {};
+        if (heightUnit === 'cm') {
+            heightData.unit = 'cm';
+            heightData.cm = parseFloat(document.getElementById('height').value);
+        } else {
+            heightData.unit = 'ft';
+            heightData.feet = parseFloat(document.getElementById('heightFeet').value);
+            heightData.inches = parseFloat(document.getElementById('heightInches').value);
+        }
+
         this.users[this.currentUserId] = {
             name: userName,
             sex: document.getElementById('sex').value,
             age: parseFloat(document.getElementById('age').value),
             height: heightCm,
+            heightData: heightData,
             activityLevel: parseFloat(document.getElementById('activityLevel').value),
             macros: this.users[this.currentUserId]?.macros || {
                 protein: 35,
@@ -542,8 +598,82 @@ class MacroMonitor {
         document.getElementById('userName').value = user.name;
         document.getElementById('sex').value = user.sex;
         document.getElementById('age').value = user.age;
-        document.getElementById('height').value = user.height;
         document.getElementById('activityLevel').value = user.activityLevel;
+        
+        // Restore height with original unit selection
+        if (user.heightData) {
+            if (user.heightData.unit === 'cm') {
+                document.querySelector('input[name="heightUnit"][value="cm"]').checked = true;
+                document.getElementById('heightCm').style.display = 'block';
+                document.getElementById('heightFt').style.display = 'none';
+                document.getElementById('height').value = user.heightData.cm;
+                document.getElementById('height').required = true;
+                document.getElementById('heightFeet').required = false;
+                document.getElementById('heightInches').required = false;
+            } else {
+                document.querySelector('input[name="heightUnit"][value="ft"]').checked = true;
+                document.getElementById('heightCm').style.display = 'none';
+                document.getElementById('heightFt').style.display = 'block';
+                document.getElementById('heightFeet').value = user.heightData.feet;
+                document.getElementById('heightInches').value = user.heightData.inches;
+                document.getElementById('height').required = false;
+                document.getElementById('heightFeet').required = true;
+                document.getElementById('heightInches').required = true;
+            }
+        } else {
+            // Fallback for older data without heightData
+            document.getElementById('height').value = user.height;
+        }
+        
+        // Show continue button if profile is complete
+        document.getElementById('continueToWeightBtn').style.display = 'inline-block';
+    }
+
+    goToWeightEntry() {
+        // Validate all fields are filled
+        const heightCm = this.convertHeightToCm();
+        const userName = document.getElementById('userName').value.trim();
+        const sex = document.getElementById('sex').value;
+        const age = document.getElementById('age').value;
+        const activityLevel = document.getElementById('activityLevel').value;
+        
+        if (!userName || !sex || !age || !heightCm || heightCm <= 0 || !activityLevel) {
+            alert('Please fill in all required fields before continuing');
+            
+            // Re-enable all inputs after alert with a more aggressive approach
+            setTimeout(() => {
+                const allInputs = document.querySelectorAll('#profileForm input, #profileForm select');
+                allInputs.forEach(input => {
+                    input.disabled = false;
+                    input.readOnly = false;
+                    input.removeAttribute('disabled');
+                    input.removeAttribute('readonly');
+                    input.style.pointerEvents = 'auto';
+                });
+                
+                // Re-initialize input handlers
+                this.setupInputFieldHandlers();
+                
+                // Focus the first empty field
+                if (!userName) document.getElementById('userName').focus();
+                else if (!sex) document.getElementById('sex').focus();
+                else if (!age) document.getElementById('age').focus();
+                else if (!heightCm || heightCm <= 0) {
+                    const heightUnit = document.querySelector('input[name="heightUnit"]:checked').value;
+                    if (heightUnit === 'cm') {
+                        document.getElementById('height').focus();
+                    } else {
+                        document.getElementById('heightFeet').focus();
+                    }
+                }
+                else if (!activityLevel) document.getElementById('activityLevel').focus();
+            }, 100);
+            
+            return;
+        }
+        
+        // Save profile first
+        this.saveProfile();
     }
 
     editProfile() {
