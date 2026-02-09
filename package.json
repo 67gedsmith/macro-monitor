@@ -7,10 +7,17 @@
     "start": "electron .",
     "dev": "electron . --dev"
   },
-  "keywords": ["BMR", "macros", "fitness", "nutrition"],
+  "keywords": [
+    "BMR",
+    "macros",
+    "fitness",
+    "nutrition"
+  ],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "electron": "^28.0.0"
+    "@types/jest": "^30.0.0",
+    "electron": "^28.0.0",
+    "jest": "^30.2.0"
   }
 }
