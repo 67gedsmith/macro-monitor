@@ -8,17 +8,31 @@
     "dev": "electron . --dev",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "serve": "http-server . -p 8080 -c-1",
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:report": "playwright show-report"
   },
-  "keywords": ["BMR", "macros", "fitness", "nutrition"],
+  "keywords": [
+    "BMR",
+    "macros",
+    "fitness",
+    "nutrition"
+  ],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "@types/jest": "^29.5.14",
     "electron": "^28.0.0",
+    "http-server": "^14.1.1",
     "jest": "^29.7.0"
   },
   "jest": {
-    "testMatch": ["**/calculator.test.js"]
+    "testMatch": [
+      "**/calculator.test.js"
+    ]
   }
 }
