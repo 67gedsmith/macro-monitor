@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1770633280789" clover="3.2.0">
-  <project timestamp="1770633280789" name="All files">
-    <metrics statements="49" coveredstatements="49" conditionals="66" coveredconditionals="65" methods="8" coveredmethods="8" elements="123" coveredelements="122" complexity="0" loc="49" ncloc="49" packages="1" files="1" classes="1"/>
+<coverage generated="1770633609550" clover="3.2.0">
+  <project timestamp="1770633609550" name="All files">
+    <metrics statements="49" coveredstatements="49" conditionals="65" coveredconditionals="65" methods="8" coveredmethods="8" elements="122" coveredelements="122" complexity="0" loc="49" ncloc="49" packages="1" files="1" classes="1"/>
     <file name="calculator.js" path="C:\Users\Ged\OneDrive\Documents\AI\macro-monitor\calculator.js">
-      <metrics statements="49" coveredstatements="49" conditionals="66" coveredconditionals="65" methods="8" coveredmethods="8"/>
+      <metrics statements="49" coveredstatements="49" conditionals="65" coveredconditionals="65" methods="8" coveredmethods="8"/>
       <line num="11" count="6" type="stmt"/>
       <line num="21" count="5" type="stmt"/>
       <line num="36" count="22" type="cond" truecount="10" falsecount="0"/>
@@ -51,8 +51,8 @@
       <line num="165" count="8" type="cond" truecount="4" falsecount="0"/>
       <line num="166" count="3" type="stmt"/>
       <line num="169" count="5" type="stmt"/>
-      <line num="173" count="1" type="cond" truecount="3" falsecount="1"/>
-      <line num="174" count="1" type="stmt"/>
+      <line num="174" count="1" type="cond" truecount="3" falsecount="0"/>
+      <line num="175" count="1" type="stmt"/>
     </file>
   </project>
 </coverage>
