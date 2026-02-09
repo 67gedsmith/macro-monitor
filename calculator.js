@@ -170,6 +170,7 @@ function calculateKatchMcArdleBMR(leanBodyMass) {
 }
 
 // Export for use in Node.js environment (tests)
+/* istanbul ignore else */
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
         convertFeetInchesToCm,
