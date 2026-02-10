@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Macro Monitor - User Profile Management', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:8080');
+    await page.goto('http://localhost:8181');
     // Clear localStorage before each test
     await page.evaluate(() => localStorage.clear());
     await page.reload();
@@ -76,7 +76,7 @@ test.describe('Macro Monitor - User Profile Management', () => {
 
 test.describe('Macro Monitor - BMR and TDEE Calculations', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:8080');
+    await page.goto('http://localhost:8181');
     await page.evaluate(() => localStorage.clear());
     await page.reload();
     
@@ -156,7 +156,7 @@ test.describe('Macro Monitor - BMR and TDEE Calculations', () => {
 
 test.describe('Macro Monitor - Macro Customization', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:8080');
+    await page.goto('http://localhost:8181');
     await page.evaluate(() => localStorage.clear());
     await page.reload();
     
@@ -242,7 +242,7 @@ test.describe('Macro Monitor - Macro Customization', () => {
 
 test.describe('Macro Monitor - Katch-McArdle Calculator', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:8080');
+    await page.goto('http://localhost:8181');
     await page.evaluate(() => localStorage.clear());
     await page.reload();
     
@@ -320,7 +320,7 @@ test.describe('Macro Monitor - Katch-McArdle Calculator', () => {
 
 test.describe('Macro Monitor - Profile Editing', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:8080');
+    await page.goto('http://localhost:8181');
     await page.evaluate(() => localStorage.clear());
     await page.reload();
     
@@ -361,7 +361,7 @@ test.describe('Macro Monitor - Profile Editing', () => {
 
 test.describe('Macro Monitor - User Persistence', () => {
   test('should persist user data across page reloads', async ({ page }) => {
-    await page.goto('http://localhost:8080');
+    await page.goto('http://localhost:8181');
     await page.evaluate(() => localStorage.clear());
     await page.reload();
     
@@ -386,7 +386,7 @@ test.describe('Macro Monitor - User Persistence', () => {
   });
 
   test('should persist user selection across reloads', async ({ page }) => {
-    await page.goto('http://localhost:8080');
+    await page.goto('http://localhost:8181');
     await page.evaluate(() => localStorage.clear());
     await page.reload();
     
@@ -402,7 +402,7 @@ test.describe('Macro Monitor - User Persistence', () => {
     await expect(page.locator('#weightSection')).toBeVisible();
     
     // Reload and verify user is still selected
-    await page.goto('http://localhost:8080');
+    await page.goto('http://localhost:8181');
     await expect(page.locator('#weightSection')).toBeVisible();
     
     // Check that user dropdown has the created user
@@ -413,7 +413,7 @@ test.describe('Macro Monitor - User Persistence', () => {
 
 test.describe('Macro Monitor - UI Validation', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:8080');
+    await page.goto('http://localhost:8181');
     await page.evaluate(() => localStorage.clear());
     await page.reload();
   });
@@ -467,3 +467,4 @@ test.describe('Macro Monitor - UI Validation', () => {
     await expect(page.locator('h3:has-text("Total Daily Energy Expenditure")')).toBeVisible();
   });
 });
+

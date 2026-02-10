@@ -21,8 +21,8 @@ export default defineConfig({
   ],
 
   webServer: {
-    command: 'npm run serve',
-    port: 8080,
+    command: 'node node_modules/http-server/bin/http-server . -p 8181 -c-1',
+    port: 8181,
     reuseExistingServer: !process.env.CI,
   },
 });
