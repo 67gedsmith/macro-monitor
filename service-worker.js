@@ -1,9 +1,10 @@
-const CACHE_NAME = 'macro-monitor-v2';
+const CACHE_NAME = 'macro-monitor-v3';
 const urlsToCache = [
   './',
   './index.html',
   './styles.css',
   './app.js',
+  './calculator.js',
   './manifest.json'
 ];
 
