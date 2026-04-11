@@ -155,6 +155,25 @@ class MacroMonitor {
     }
 
     setupEventListeners() {
+        // Home screen navigation
+        document.getElementById('goToMacroCalc').addEventListener('click', () => {
+            this.showMacroCalculator();
+        });
+
+        document.getElementById('goToOneRepMax').addEventListener('click', () => {
+            this.showOneRepMaxCalculator();
+        });
+
+        document.getElementById('backToHomeFromMacro').addEventListener('click', () => {
+            this.showHomeScreen();
+        });
+
+        document.getElementById('backToHomeFromOneRepMax').addEventListener('click', () => {
+            this.resetOneRepMaxCalculator();
+            this.resetTarget1RMCalculator();
+            this.showHomeScreen();
+        });
+
         document.getElementById('userSelect').addEventListener('change', (e) => {
             this.handleUserSelect(e.target.value);
         });
@@ -258,6 +277,18 @@ class MacroMonitor {
             document.getElementById(id).addEventListener('input', () => {
                 this.updateKatchMacroTotal();
             });
+        });
+
+        // One Rep Max calculator event listeners
+        document.getElementById('oneRepMaxForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.calculateOneRepMax();
+        });
+
+        // Target 1RM reverse calculator event listener
+        document.getElementById('target1RMForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.calculateTarget1RMPlan();
         });
     }
 
@@ -627,6 +658,25 @@ class MacroMonitor {
         
         // Show continue button if profile is complete
         document.getElementById('continueToWeightBtn').style.display = 'inline-block';
+    }
+
+    // Home Screen Navigation Methods
+    showHomeScreen() {
+        document.getElementById('homeScreen').style.display = 'block';
+        document.getElementById('macroCalculatorApp').style.display = 'none';
+        document.getElementById('oneRepMaxApp').style.display = 'none';
+    }
+
+    showMacroCalculator() {
+        document.getElementById('homeScreen').style.display = 'none';
+        document.getElementById('macroCalculatorApp').style.display = 'block';
+        document.getElementById('oneRepMaxApp').style.display = 'none';
+    }
+
+    showOneRepMaxCalculator() {
+        document.getElementById('homeScreen').style.display = 'none';
+        document.getElementById('macroCalculatorApp').style.display = 'none';
+        document.getElementById('oneRepMaxApp').style.display = 'block';
     }
 
     goToWeightEntry() {
@@ -1104,6 +1154,162 @@ class MacroMonitor {
         if (this.currentKatchWeightLoss) {
             this.updateKatchMacroBreakdown();
         }
+    }
+
+    // One Rep Max Calculator Methods
+    calculateOneRepMax() {
+        const weightLifted = parseFloat(document.getElementById('weightLifted').value);
+        const repsCompleted = parseInt(document.getElementById('repsCompleted').value);
+
+        if (!weightLifted || weightLifted <= 0) {
+            alert('Please enter a valid weight');
+            return;
+        }
+
+        if (!repsCompleted || repsCompleted < 1 || repsCompleted > 10) {
+            alert('Please enter repetitions between 1 and 10 for best accuracy');
+            return;
+        }
+
+        // Calculate using all three formulas (weight is in kg)
+        const results = calculateAllOneRepMax(weightLifted, repsCompleted);
+
+        // Store for percentage calculations
+        this.currentOneRepMax = results.average;
+
+        // Display results
+        document.getElementById('epleyResult').textContent = `${results.epley} kg`;
+        document.getElementById('brzyckiResult').textContent = `${results.brzycki} kg`;
+        document.getElementById('lombardiResult').textContent = `${results.lombardi} kg`;
+        document.getElementById('averageResult').textContent = `${results.average} kg`;
+
+        // Calculate training percentages based on average
+        this.displayTrainingPercentages(results.average);
+
+        // Show results section
+        document.getElementById('oneRepMaxResults').style.display = 'block';
+        
+        // Scroll to results
+        document.getElementById('oneRepMaxResults').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    displayTrainingPercentages(oneRepMax) {
+        const percentages = {
+            50: Math.round(oneRepMax * 0.50),
+            55: Math.round(oneRepMax * 0.55),
+            60: Math.round(oneRepMax * 0.60),
+            70: Math.round(oneRepMax * 0.70),
+            75: Math.round(oneRepMax * 0.75),
+            80: Math.round(oneRepMax * 0.80),
+            85: Math.round(oneRepMax * 0.85),
+            90: Math.round(oneRepMax * 0.90),
+            95: Math.round(oneRepMax * 0.95)
+        };
+
+        document.getElementById('weight50').textContent = 
+            `${percentages[50]}-${percentages[60]} kg`;
+        document.getElementById('weight70').textContent = 
+            `${percentages[70]} kg`;
+        document.getElementById('weight75').textContent = 
+            `${percentages[70]}-${percentages[80]} kg`;
+        document.getElementById('weight85').textContent = 
+            `${percentages[80]}-${oneRepMax} kg`;
+    }
+
+    resetOneRepMaxCalculator() {
+        // Reset the form fields
+        document.getElementById('oneRepMaxForm').reset();
+        
+        // Hide the results section
+        document.getElementById('oneRepMaxResults').style.display = 'none';
+        
+        // Clear the displayed results
+        document.getElementById('epleyResult').textContent = '-';
+        document.getElementById('brzyckiResult').textContent = '-';
+        document.getElementById('lombardiResult').textContent = '-';
+        document.getElementById('averageResult').textContent = '-';
+        
+        // Clear training percentages
+        document.getElementById('weight50').textContent = '-';
+        document.getElementById('weight70').textContent = '-';
+        document.getElementById('weight75').textContent = '-';
+        document.getElementById('weight85').textContent = '-';
+        
+        // Clear stored values
+        this.currentOneRepMax = null;
+    }
+
+    // Target 1RM Reverse Calculator Methods
+    calculateTarget1RMPlan() {
+        const target1RM = parseFloat(document.getElementById('target1RM').value);
+
+        if (!target1RM || target1RM <= 0) {
+            alert('Please enter a valid target 1RM');
+            return;
+        }
+
+        // Generate the weight table for reps 1-10
+        const weightTable = generateTargetWeightTable(target1RM, 1, 10);
+
+        // Display the target in the results
+        document.getElementById('targetDisplay').textContent = target1RM;
+
+        // Populate the table
+        this.populateTargetWeightTable(weightTable);
+
+        // Show results section
+        document.getElementById('target1RMResults').style.display = 'block';
+
+        // Scroll to results
+        document.getElementById('target1RMResults').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    populateTargetWeightTable(weightTable) {
+        const tbody = document.getElementById('targetWeightTableBody');
+        tbody.innerHTML = ''; // Clear existing rows
+
+        // Define training focus for different rep ranges
+        const trainingFocus = {
+            1: 'Maximum Strength',
+            2: 'Maximum Strength',
+            3: 'Maximum Strength',
+            4: 'Strength & Power',
+            5: 'Strength & Power',
+            6: 'Strength & Hypertrophy',
+            7: 'Hypertrophy',
+            8: 'Hypertrophy',
+            9: 'Hypertrophy & Endurance',
+            10: 'Hypertrophy & Endurance'
+        };
+
+        weightTable.forEach(row => {
+            const tr = document.createElement('tr');
+            
+            // Highlight strength-focused rows (3-5 reps)
+            if (row.reps >= 3 && row.reps <= 5) {
+                tr.classList.add('highlight');
+            }
+
+            tr.innerHTML = `
+                <td>${row.reps}</td>
+                <td><strong>${row.weight} kg</strong></td>
+                <td>${trainingFocus[row.reps]}</td>
+            `;
+
+            tbody.appendChild(tr);
+        });
+    }
+
+    resetTarget1RMCalculator() {
+        // Reset the form
+        document.getElementById('target1RMForm').reset();
+        
+        // Hide results
+        document.getElementById('target1RMResults').style.display = 'none';
+        
+        // Clear the table
+        document.getElementById('targetWeightTableBody').innerHTML = '';
+        document.getElementById('targetDisplay').textContent = '-';
     }
 }
 

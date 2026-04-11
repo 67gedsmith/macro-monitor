@@ -6,7 +6,17 @@ const {
     calculateWeightLossCalories,
     calculateMacros,
     calculateLeanBodyMass,
-    calculateKatchMcArdleBMR
+    calculateKatchMcArdleBMR,
+    calculateEpleyOneRepMax,
+    calculateBrzyckiOneRepMax,
+    calculateLombardiOneRepMax,
+    calculateAllOneRepMax,
+    reverseEpleyFormula,
+    reverseBrzyckiFormula,
+    reverseLombardiFormula,
+    roundToGymWeight,
+    calculateWeightForTarget1RM,
+    generateTargetWeightTable
 } = require('./calculator');
 
 describe('Unit Conversion Functions', () => {
@@ -564,5 +574,290 @@ describe('Edge Cases and Boundary Tests', () => {
     test('handles high body fat percentage (50%)', () => {
         const lbm = calculateLeanBodyMass(100, 50);
         expect(lbm).toBeCloseTo(50, 1);
+    });
+});
+
+describe('One Rep Max Calculations', () => {
+    describe('calculateEpleyOneRepMax', () => {
+        test('calculates 1RM for 100kg × 5 reps', () => {
+            const result = calculateEpleyOneRepMax(100, 5);
+            expect(result).toBe(117); // 100 * (1 + 5/30) = 116.67 rounded to 117
+        });
+
+        test('calculates 1RM for 225lbs × 8 reps', () => {
+            const result = calculateEpleyOneRepMax(225, 8);
+            expect(result).toBe(285); // 225 * (1 + 8/30) = 285
+        });
+
+        test('returns same weight for 1 rep', () => {
+            const result = calculateEpleyOneRepMax(200, 1);
+            expect(result).toBe(200);
+        });
+
+        test('calculates 1RM for 80kg × 10 reps', () => {
+            const result = calculateEpleyOneRepMax(80, 10);
+            expect(result).toBe(107); // 80 * (1 + 10/30) = 106.67 rounded to 107
+        });
+
+        test('throws error for invalid weight', () => {
+            expect(() => calculateEpleyOneRepMax(0, 5)).toThrow('Weight must be a positive number');
+            expect(() => calculateEpleyOneRepMax(-100, 5)).toThrow('Weight must be a positive number');
+        });
+
+        test('throws error for invalid reps', () => {
+            expect(() => calculateEpleyOneRepMax(100, 0)).toThrow('Repetitions must be between 1 and 10 for accurate results');
+            expect(() => calculateEpleyOneRepMax(100, 11)).toThrow('Repetitions must be between 1 and 10 for accurate results');
+        });
+    });
+
+    describe('calculateBrzyckiOneRepMax', () => {
+        test('calculates 1RM for 100kg × 5 reps', () => {
+            const result = calculateBrzyckiOneRepMax(100, 5);
+            expect(result).toBe(113); // 100 * 36/(37-5) = 112.5 rounded to 113
+        });
+
+        test('calculates 1RM for 225lbs × 8 reps', () => {
+            const result = calculateBrzyckiOneRepMax(225, 8);
+            expect(result).toBe(279); // 225 * 36/(37-8) = 279.31 rounded to 279
+        });
+
+        test('returns same weight for 1 rep', () => {
+            const result = calculateBrzyckiOneRepMax(200, 1);
+            expect(result).toBe(200);
+        });
+
+        test('calculates 1RM for 80kg × 10 reps (should match Epley)', () => {
+            const result = calculateBrzyckiOneRepMax(80, 10);
+            expect(result).toBe(107); // 80 * 36/(37-10) = 106.67 rounded to 107
+        });
+
+        test('throws error for invalid weight', () => {
+            expect(() => calculateBrzyckiOneRepMax(0, 5)).toThrow('Weight must be a positive number');
+        });
+
+        test('throws error for invalid reps', () => {
+            expect(() => calculateBrzyckiOneRepMax(100, 11)).toThrow('Repetitions must be between 1 and 10 for accurate results');
+        });
+    });
+
+    describe('calculateLombardiOneRepMax', () => {
+        test('calculates 1RM for 100kg × 5 reps', () => {
+            const result = calculateLombardiOneRepMax(100, 5);
+            expect(result).toBe(117); // 100 * 5^0.10 = 117.46 rounded to 117
+        });
+
+        test('calculates 1RM for 225lbs × 8 reps', () => {
+            const result = calculateLombardiOneRepMax(225, 8);
+            expect(result).toBe(277); // 225 * 8^0.10 = 277.00 rounded to 277
+        });
+
+        test('returns same weight for 1 rep', () => {
+            const result = calculateLombardiOneRepMax(200, 1);
+            expect(result).toBe(200);
+        });
+
+        test('calculates 1RM for 80kg × 10 reps', () => {
+            const result = calculateLombardiOneRepMax(80, 10);
+            expect(result).toBe(101); // 80 * 10^0.10 = 100.63 rounded to 101
+        });
+
+        test('throws error for invalid weight', () => {
+            expect(() => calculateLombardiOneRepMax(0, 5)).toThrow('Weight must be a positive number');
+        });
+
+        test('throws error for invalid reps', () => {
+            expect(() => calculateLombardiOneRepMax(100, 0)).toThrow('Repetitions must be between 1 and 10 for accurate results');
+        });
+    });
+
+    describe('calculateAllOneRepMax', () => {
+        test('calculates all three formulas and average for 100kg × 5 reps', () => {
+            const results = calculateAllOneRepMax(100, 5);
+            expect(results.epley).toBe(117);
+            expect(results.brzycki).toBe(113);
+            expect(results.lombardi).toBe(117);
+            expect(results.average).toBe(116); // (117 + 113 + 117) / 3 = 115.67 rounded to 116
+        });
+
+        test('calculates all three formulas for 225lbs × 8 reps', () => {
+            const results = calculateAllOneRepMax(225, 8);
+            expect(results.epley).toBe(285);
+            expect(results.brzycki).toBe(279);
+            expect(results.lombardi).toBe(277);
+            expect(results.average).toBe(280); // (285 + 279 + 277) / 3 = 280.33 rounded to 280
+        });
+
+        test('returns same weight for all formulas with 1 rep', () => {
+            const results = calculateAllOneRepMax(200, 1);
+            expect(results.epley).toBe(200);
+            expect(results.brzycki).toBe(200);
+            expect(results.lombardi).toBe(200);
+            expect(results.average).toBe(200);
+        });
+
+        test('verifies Epley and Brzycki match at 10 reps', () => {
+            const results = calculateAllOneRepMax(80, 10);
+            expect(results.epley).toBe(results.brzycki);
+        });
+    });
+});
+
+describe('Reverse One Rep Max Calculations', () => {
+    describe('reverseEpleyFormula', () => {
+        test('calculates weight needed for 100kg 1RM with 5 reps', () => {
+            const weight = reverseEpleyFormula(100, 5);
+            // 100 / (1 + 5/30) = 100 / 1.1667 = 85.71
+            expect(weight).toBeCloseTo(85.71, 0);
+        });
+
+        test('calculates weight needed for 150kg 1RM with 8 reps', () => {
+            const weight = reverseEpleyFormula(150, 8);
+            // 150 / (1 + 8/30) = 150 / 1.2667 = 118.42
+            expect(weight).toBeCloseTo(118.42, 0);
+        });
+
+        test('returns same weight for 1 rep', () => {
+            const weight = reverseEpleyFormula(100, 1);
+            expect(weight).toBe(100);
+        });
+
+        test('throws error for invalid target 1RM', () => {
+            expect(() => reverseEpleyFormula(0, 5)).toThrow('Target 1RM must be a positive number');
+        });
+
+        test('throws error for invalid reps', () => {
+            expect(() => reverseEpleyFormula(100, 11)).toThrow('Repetitions must be between 1 and 10');
+        });
+    });
+
+    describe('reverseBrzyckiFormula', () => {
+        test('calculates weight needed for 100kg 1RM with 5 reps', () => {
+            const weight = reverseBrzyckiFormula(100, 5);
+            // 100 * (37 - 5) / 36 = 100 * 32/36 = 88.89
+            expect(weight).toBeCloseTo(88.89, 0);
+        });
+
+        test('calculates weight needed for 150kg 1RM with 8 reps', () => {
+            const weight = reverseBrzyckiFormula(150, 8);
+            // 150 * (37 - 8) / 36 = 150 * 29/36 = 120.83
+            expect(weight).toBeCloseTo(120.83, 0);
+        });
+
+        test('returns same weight for 1 rep', () => {
+            const weight = reverseBrzyckiFormula(100, 1);
+            expect(weight).toBe(100);
+        });
+    });
+
+    describe('reverseLombardiFormula', () => {
+        test('calculates weight needed for 100kg 1RM with 5 reps', () => {
+            const weight = reverseLombardiFormula(100, 5);
+            // 100 / 5^0.10 = 100 / 1.1746 = 85.13
+            expect(weight).toBeCloseTo(85.13, 0);
+        });
+
+        test('calculates weight needed for 150kg 1RM with 8 reps', () => {
+            const weight = reverseLombardiFormula(150, 8);
+            // 150 / 8^0.10 = 150 / 1.2311 = 121.84
+            expect(weight).toBeCloseTo(121.84, 0);
+        });
+
+        test('returns same weight for 1 rep', () => {
+            const weight = reverseLombardiFormula(100, 1);
+            expect(weight).toBe(100);
+        });
+    });
+
+    describe('roundToGymWeight', () => {
+        test('rounds to nearest 2.5kg - lower', () => {
+            expect(roundToGymWeight(86.6)).toBe(87.5);
+        });
+
+        test('rounds to nearest 2.5kg - upper', () => {
+            expect(roundToGymWeight(88.8)).toBe(90);
+        });
+
+        test('rounds exact 2.5kg increments correctly', () => {
+            expect(roundToGymWeight(85)).toBe(85);
+            expect(roundToGymWeight(87.5)).toBe(87.5);
+            expect(roundToGymWeight(90)).toBe(90);
+        });
+
+        test('rounds weights ending in .3 down', () => {
+            expect(roundToGymWeight(87.3)).toBe(87.5);
+        });
+
+        test('rounds weights ending in .8 up', () => {
+            expect(roundToGymWeight(87.8)).toBe(87.5);
+        });
+
+        test('handles very small weights', () => {
+            expect(roundToGymWeight(21.2)).toBe(20);
+        });
+    });
+
+    describe('calculateWeightForTarget1RM', () => {
+        test('calculates average weight for 100kg 1RM with 5 reps', () => {
+            const weight = calculateWeightForTarget1RM(100, 5);
+            // Average would be ~87.2kg, rounded to nearest 2.5kg = 87.5kg
+            expect(weight).toBe(87.5);
+        });
+
+        test('calculates average weight for 150kg 1RM with 8 reps', () => {
+            const weight = calculateWeightForTarget1RM(150, 8);
+            // Average would be ~120.4kg, rounded to nearest 2.5kg = 120kg
+            expect(weight).toBe(120);
+        });
+
+        test('returns target 1RM for 1 rep', () => {
+            const weight = calculateWeightForTarget1RM(100, 1);
+            expect(weight).toBe(100);
+        });
+
+        test('all weights are in 2.5kg increments', () => {
+            const weight1 = calculateWeightForTarget1RM(100, 3);
+            const weight2 = calculateWeightForTarget1RM(100, 7);
+            const weight3 = calculateWeightForTarget1RM(150, 5);
+            
+            // Check all weights are divisible by 2.5
+            expect(weight1 % 2.5).toBe(0);
+            expect(weight2 % 2.5).toBe(0);
+            expect(weight3 % 2.5).toBe(0);
+        });
+    });
+
+    describe('generateTargetWeightTable', () => {
+        test('generates table for 100kg target with default range (1-10 reps)', () => {
+            const table = generateTargetWeightTable(100);
+            expect(table).toHaveLength(10);
+            expect(table[0].reps).toBe(1);
+            expect(table[0].weight).toBe(100);
+            expect(table[9].reps).toBe(10);
+        });
+
+        test('generates table with custom range', () => {
+            const table = generateTargetWeightTable(100, 3, 7);
+            expect(table).toHaveLength(5);
+            expect(table[0].reps).toBe(3);
+            expect(table[4].reps).toBe(7);
+        });
+
+        test('throws error for invalid target 1RM', () => {
+            expect(() => generateTargetWeightTable(0)).toThrow('Target 1RM must be a positive number');
+        });
+
+        test('verifies weights decrease or stay same as reps increase (due to 2.5kg rounding)', () => {
+            const table = generateTargetWeightTable(100);
+            for (let i = 1; i < table.length; i++) {
+                expect(table[i].weight).toBeLessThanOrEqual(table[i-1].weight);
+            }
+        });
+
+        test('verifies all weights are in 2.5kg increments', () => {
+            const table = generateTargetWeightTable(100);
+            table.forEach(row => {
+                expect(row.weight % 2.5).toBe(0);
+            });
+        });
     });
 });

@@ -169,6 +169,224 @@ function calculateKatchMcArdleBMR(leanBodyMass) {
     return Math.round(370 + 21.6 * leanBodyMass);
 }
 
+/**
+ * Calculate One Rep Max using Epley Formula
+ * 1RM = Weight × (1 + Repetitions/30)
+ * 
+ * @param {number} weight - Weight lifted
+ * @param {number} reps - Number of repetitions (1-10 for best accuracy)
+ * @returns {number} Estimated one rep max
+ */
+function calculateEpleyOneRepMax(weight, reps) {
+    if (!weight || weight <= 0) {
+        throw new Error('Weight must be a positive number');
+    }
+    
+    if (!reps || reps < 1 || reps > 10) {
+        throw new Error('Repetitions must be between 1 and 10 for accurate results');
+    }
+    
+    if (reps === 1) {
+        return weight;
+    }
+    
+    return Math.round(weight * (1 + reps / 30));
+}
+
+/**
+ * Calculate One Rep Max using Brzycki Formula
+ * 1RM = Weight × 36/(37 – Repetitions)
+ * 
+ * @param {number} weight - Weight lifted
+ * @param {number} reps - Number of repetitions (1-10 for best accuracy)
+ * @returns {number} Estimated one rep max
+ */
+function calculateBrzyckiOneRepMax(weight, reps) {
+    if (!weight || weight <= 0) {
+        throw new Error('Weight must be a positive number');
+    }
+    
+    if (!reps || reps < 1 || reps > 10) {
+        throw new Error('Repetitions must be between 1 and 10 for accurate results');
+    }
+    
+    if (reps === 1) {
+        return weight;
+    }
+    
+    return Math.round(weight * 36 / (37 - reps));
+}
+
+/**
+ * Calculate One Rep Max using Lombardi Formula
+ * 1RM = Weight × Repetitions^0.10
+ * 
+ * @param {number} weight - Weight lifted
+ * @param {number} reps - Number of repetitions (1-10 for best accuracy)
+ * @returns {number} Estimated one rep max
+ */
+function calculateLombardiOneRepMax(weight, reps) {
+    if (!weight || weight <= 0) {
+        throw new Error('Weight must be a positive number');
+    }
+    
+    if (!reps || reps < 1 || reps > 10) {
+        throw new Error('Repetitions must be between 1 and 10 for accurate results');
+    }
+    
+    if (reps === 1) {
+        return weight;
+    }
+    
+    return Math.round(weight * Math.pow(reps, 0.10));
+}
+
+/**
+ * Calculate all three One Rep Max formulas and return average
+ * 
+ * @param {number} weight - Weight lifted
+ * @param {number} reps - Number of repetitions (1-10 for best accuracy)
+ * @returns {object} Object containing all three formula results and average
+ */
+function calculateAllOneRepMax(weight, reps) {
+    const epley = calculateEpleyOneRepMax(weight, reps);
+    const brzycki = calculateBrzyckiOneRepMax(weight, reps);
+    const lombardi = calculateLombardiOneRepMax(weight, reps);
+    const average = Math.round((epley + brzycki + lombardi) / 3);
+    
+    return {
+        epley,
+        brzycki,
+        lombardi,
+        average
+    };
+}
+
+/**
+ * Reverse Epley Formula - Calculate weight needed for target 1RM
+ * Weight = 1RM / (1 + Reps/30)
+ * 
+ * @param {number} targetOneRepMax - Target one rep max
+ * @param {number} reps - Number of repetitions (1-10)
+ * @returns {number} Weight needed to achieve target 1RM
+ */
+function reverseEpleyFormula(targetOneRepMax, reps) {
+    if (!targetOneRepMax || targetOneRepMax <= 0) {
+        throw new Error('Target 1RM must be a positive number');
+    }
+    
+    if (!reps || reps < 1 || reps > 10) {
+        throw new Error('Repetitions must be between 1 and 10');
+    }
+    
+    if (reps === 1) {
+        return targetOneRepMax;
+    }
+    
+    return targetOneRepMax / (1 + reps / 30);
+}
+
+/**
+ * Reverse Brzycki Formula - Calculate weight needed for target 1RM
+ * Weight = 1RM × (37 - Reps)/36
+ * 
+ * @param {number} targetOneRepMax - Target one rep max
+ * @param {number} reps - Number of repetitions (1-10)
+ * @returns {number} Weight needed to achieve target 1RM
+ */
+function reverseBrzyckiFormula(targetOneRepMax, reps) {
+    if (!targetOneRepMax || targetOneRepMax <= 0) {
+        throw new Error('Target 1RM must be a positive number');
+    }
+    
+    if (!reps || reps < 1 || reps > 10) {
+        throw new Error('Repetitions must be between 1 and 10');
+    }
+    
+    if (reps === 1) {
+        return targetOneRepMax;
+    }
+    
+    return targetOneRepMax * (37 - reps) / 36;
+}
+
+/**
+ * Reverse Lombardi Formula - Calculate weight needed for target 1RM
+ * Weight = 1RM / Reps^0.10
+ * 
+ * @param {number} targetOneRepMax - Target one rep max
+ * @param {number} reps - Number of repetitions (1-10)
+ * @returns {number} Weight needed to achieve target 1RM
+ */
+function reverseLombardiFormula(targetOneRepMax, reps) {
+    if (!targetOneRepMax || targetOneRepMax <= 0) {
+        throw new Error('Target 1RM must be a positive number');
+    }
+    
+    if (!reps || reps < 1 || reps > 10) {
+        throw new Error('Repetitions must be between 1 and 10');
+    }
+    
+    if (reps === 1) {
+        return targetOneRepMax;
+    }
+    
+    return targetOneRepMax / Math.pow(reps, 0.10);
+}
+
+/**
+ * Round weight to achievable gym plate combinations
+ * Standard gym plates: 1.25kg, 2.5kg, 5kg, 10kg, 15kg, 20kg, 25kg
+ * Since plates are added in pairs, the smallest increment is 2.5kg (pair of 1.25kg)
+ * 
+ * @param {number} weight - Weight to round
+ * @returns {number} Weight rounded to nearest 2.5kg
+ */
+function roundToGymWeight(weight) {
+    return Math.round(weight / 2.5) * 2.5;
+}
+
+/**
+ * Calculate average weight needed for target 1RM across all three formulas
+ * Rounded to achievable gym weight (nearest 2.5kg)
+ * 
+ * @param {number} targetOneRepMax - Target one rep max
+ * @param {number} reps - Number of repetitions (1-10)
+ * @returns {number} Average weight needed, rounded to gym plates
+ */
+function calculateWeightForTarget1RM(targetOneRepMax, reps) {
+    const epley = reverseEpleyFormula(targetOneRepMax, reps);
+    const brzycki = reverseBrzyckiFormula(targetOneRepMax, reps);
+    const lombardi = reverseLombardiFormula(targetOneRepMax, reps);
+    
+    const average = (epley + brzycki + lombardi) / 3;
+    return roundToGymWeight(average);
+}
+
+/**
+ * Generate a table of weights for different rep counts to achieve target 1RM
+ * 
+ * @param {number} targetOneRepMax - Target one rep max
+ * @param {number} minReps - Minimum reps (default 1)
+ * @param {number} maxReps - Maximum reps (default 10)
+ * @returns {Array} Array of objects with reps and weight
+ */
+function generateTargetWeightTable(targetOneRepMax, minReps = 1, maxReps = 10) {
+    if (!targetOneRepMax || targetOneRepMax <= 0) {
+        throw new Error('Target 1RM must be a positive number');
+    }
+    
+    const table = [];
+    for (let reps = minReps; reps <= maxReps; reps++) {
+        table.push({
+            reps: reps,
+            weight: calculateWeightForTarget1RM(targetOneRepMax, reps)
+        });
+    }
+    
+    return table;
+}
+
 // Export for use in Node.js environment (tests)
 /* istanbul ignore else */
 if (typeof module !== 'undefined' && module.exports) {
@@ -180,6 +398,16 @@ if (typeof module !== 'undefined' && module.exports) {
         calculateWeightLossCalories,
         calculateMacros,
         calculateLeanBodyMass,
-        calculateKatchMcArdleBMR
+        calculateKatchMcArdleBMR,
+        calculateEpleyOneRepMax,
+        calculateBrzyckiOneRepMax,
+        calculateLombardiOneRepMax,
+        calculateAllOneRepMax,
+        reverseEpleyFormula,
+        reverseBrzyckiFormula,
+        reverseLombardiFormula,
+        roundToGymWeight,
+        calculateWeightForTarget1RM,
+        generateTargetWeightTable
     };
 }

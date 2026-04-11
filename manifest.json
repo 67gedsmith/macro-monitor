@@ -1,7 +1,7 @@
 {
-  "name": "Macro Monitor - BMR & Macro Calculator",
+  "name": "Macro Monitor - Fitness Calculators",
   "short_name": "Macro Monitor",
-  "description": "Calculate your BMR, TDEE, and macro breakdown for weight loss goals",
+  "description": "Calculate your BMR, TDEE, macro breakdown, and one rep max",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#667eea",
